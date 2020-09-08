@@ -71,6 +71,7 @@
     r = read.xlsx("MIP2015_12s.xlsx", sheet = "r", colNames = FALSE) # Remunerações
     e = read.xlsx("MIP2015_12s.xlsx", sheet = "e", colNames = FALSE) # Pessoal ocupado
     c = read.xlsx("MIP2015_12s.xlsx", sheet = "c", colNames = FALSE) # Consumo das famílias
+    Setores = read.xlsx("MIP2015_12s.xlsx", sheet = "set", colNames = FALSE) # Setores
     
   } # Importando dados
   {
