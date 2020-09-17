@@ -728,6 +728,188 @@
   
 } # Campo de Influência
 {
+  # Extração Hipotética
+  
+  BLextrac = matrix(NA, ncol=1, nrow=n) # Matriz Extração (será preenchida no loop)
+  FLextrac = matrix(NA, ncol=1, nrow=n) # Matriz Extração (será preenchida no loop)
+  
+  # Loop Extração
+  for (i in 1:n) {
+    for (j in 1:n) {
+      ABL = A
+      ABL[, j] = 0
+      BBL = solve(I - ABL)
+      xbl = BBL %*% y
+      tbl = sum(x) - sum(xbl)
+      BLextrac[j] = tbl
+      BLextracp = BLextrac / sum(x) * 100
+      
+      FFL = F
+      FFL[i, ] = 0
+      GFL = solve(I - FFL)
+      xfl = t(sp) %*% GFL
+      tfl = sum(x) - sum(xfl)
+      FLextrac[i] = tfl
+      FLextracp = FLextrac / sum(x) * 100
+      
+      Extrac = cbind(BLextrac, FLextrac, BLextracp, FLextracp)
+      colnames(Extrac) = c("BL", "FL", "BL%", "FL%")
+    }
+  }
+  
+  
+  # Tabela de dados (data frame) com os resultados
+  Extrac = cbind(Setores, Extrac)
+  colnames(Extrac) = c("Setores", "BL", "FL", "BL%", "FL%")
+  
+  Extrac # Visualização do objeto (data.frame com os resultados)
+  
+  kable(Extrac, caption = "Extração Hipotética", align = "lcccc") %>%
+    kable_styling(bootstrap_options = "striped", full_width = FALSE) %>% 
+    footnote(general = "Elaboração própria com dados da MIP do IBGE (2015).",
+             general_title = "Fonte:",
+             footnote_as_chunk = TRUE, title_format = c("bold"))
+  
+  
+  
+} # Extração Hipotética
+{
+  # Decomposição Estrutural
+  
+  # Leitura do pacote
+  library(openxlsx)
+  
+  ## Ano: 2015
+  
+  # Consumo Intermediário: 
+  Z15 = data.matrix(read.xlsx("MIP2015_12s.xlsx", sheet = "Z", colNames = FALSE))
+  
+  # Demanda Final:
+  y15 = data.matrix(read.xlsx("MIP2015_12s.xlsx", sheet = "y", colNames = FALSE))
+  
+  # Valor Bruto da Produção:
+  x15 = data.matrix(read.xlsx("MIP2015_12s.xlsx", sheet = "x", colNames = FALSE))
+  x15 = as.vector(x15)
+  
+  ## Ano: 2010
+  
+  # Consumo Intermediário: 
+  Z10 = data.matrix(read.xlsx("MIP2010_12s.xlsx", sheet = "Z", colNames = FALSE))
+  
+  # Demanda Final:
+  y10 = data.matrix(read.xlsx("MIP2010_12s.xlsx", sheet = "y", colNames = FALSE))
+  
+  # Valor Bruto da Produção:
+  x10 = data.matrix(read.xlsx("MIP2010_12s.xlsx", sheet = "x", colNames = FALSE))
+  x10 = as.vector(x10)
+  
+  
+  ## Ano: 2010
+  ## Atualização
+  Z10 = Z10 / 71.13 * 100 # Consumo Intermediário 
+  y10 = y10 / 71.13 * 100 # Demanda Final
+  x10 = x10 / 71.13 * 100 # Valor Bruto da Produção
+  
+  ## Auxiliares
+  n = length(x15) # Número de setores (o mesmo nos dois anos)
+  I = diag(n)     # Matriz Identidade
+  
+  ## Ano: 2015
+  
+  A15 = Z15 %*% diag(1 / x15) # Matriz de Coeficientes Técnicos
+  B15 = solve(I - A15)        # Matriz Inversa de Leontief
+  
+  ## Ano: 2010
+  
+  A10 = Z10 %*% diag(1 / x10) # Matriz de Coeficientes Técnicos
+  B10 = solve(I - A10)        # Matriz Inversa de Leontief
+  
+  deltax = x15 - x10 # Variação produto
+  
+  MUD_TEC = 0.5 *((B15 - B10) %*% (y10 + y15)) # Mudança tcnológica
+  MUD_DF = 0.5 *((B10 + B15) %*% (y15 - y10)) # Mudança na demanda
+  
+  # Tabela com os resultados
+  Decomp = cbind(Setores, deltax, MUD_TEC, MUD_DF)
+  
+  colnames(Decomp) = c("Setores", "Var. x", "Var. Tecnológica", "Var. Demanda Final")
+  
+  Decomp = rbind(Decomp, c("Total", colSums(Decomp[, 2:4])))
+  
+  Decomp$`Var. x` = as.numeric(Decomp$`Var. x`)
+  Decomp$`Var. Tecnológica` = as.numeric(Decomp$`Var. Tecnológica`)
+  Decomp$`Var. Demanda Final` = as.numeric(Decomp$`Var. Demanda Final`)
+  
+  Decomp
+  
+  # Leitura dos pacotes
+  library(knitr)
+  library(kableExtra)
+  library(dplyr)
+  
+  # Tabela
+  kable(Decomp, caption = "Decomposição Estrutural", align = "lccc") %>%
+    kable_styling(bootstrap_options = "striped", full_width = FALSE) %>% 
+    footnote(general = "Elaboração própria com dados da MIP do IBGE (2015/10).",
+             general_title = "Fonte:",
+             footnote_as_chunk = TRUE, title_format = c("bold"))
+  
+  # Gráfico
+  
+  # Leitura dos pacotes
+  library(ggplot2)
+  library(scales)
+  
+  # Seleção apenas dos n setores (exclui a linha com o total)
+  Decomp_set = Decomp[-13,]
+  
+  # Variação de x
+  g1 = ggplot(Decomp_set) +
+    geom_col(aes(x = factor(Setores, levels = unique(Setores)), y = `Var. x`), 
+             fill = "blue4") +
+    theme_bw() +
+    xlab("Setores") +
+    ylab(" ") +
+    ggtitle("Decomposição Estrutural") +
+    labs(subtitle = "2015-2010\nVariação do Produto") +
+    theme(plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5)) +
+    theme(axis.text.x = element_text(angle=35, vjust = 0.7)) +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.01),
+                       limits = c(-50000, 250000),
+                       breaks = seq(from = -50000, to = 250000, by = 50000))
+  
+  # Variação Tecnológica
+  g2 = ggplot(Decomp_set) +
+    geom_col(aes(x = factor(Setores, levels = unique(Setores)), y = `Var. Tecnológica`), 
+             fill = "firebrick") +
+    theme_bw() +
+    xlab("Setores") +
+    ylab(" ") +
+    ggtitle("Variação Tecnológica") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.01))
+  
+  # Variação na Demanda Final
+  g3 =  ggplot(Decomp_set) +
+    geom_col(aes(x = factor(Setores, levels = unique(Setores)), y = `Var. Demanda Final`),
+             fill = "deepskyblue3") +
+    theme_bw() +
+    xlab("Setores") +
+    ylab(" ") +
+    ggtitle("Variação na Demanda Final") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.01))
+  
+  # Grid com os três gráficos
+  library(gridExtra)
+  grid.arrange(g1, arrangeGrob(g2, g3, ncol = 2), ncol = 1,
+               bottom = "Fonte: Elaboração própria com dados da MIP do IBGE (2015/2010).")
+  
+} # Decomposição Estrutural
+{
   # Exportando Resultados
   
   # Criando o "workbooK" para receber os resultados
@@ -741,6 +923,8 @@
   addWorksheet(wb, "CV")
   addWorksheet(wb, "IPLN")
   addWorksheet(wb, "SI")
+  addWorksheet(wb, "ExtHipo")
+  addWorksheet(wb, "Decomp")
   
   # Salvando os resultados nas abas
   writeDataTable(wb, "MP", x = MultProd)
@@ -750,6 +934,8 @@
   writeDataTable(wb, "CV", x = CoefVar)
   writeDataTable(wb, "IPLN", x = IPLN)
   writeData(wb, "SI", x = SI, colNames = FALSE)
+  writeDataTable(wb, "ExtHipo", x = Extrac)
+  writeDataTable(wb, "Decomp", x = Decomp)
   
   # Exportando como arquivo XLSX
   saveWorkbook(wb, file = "Resultados.xlsx", overwrite = TRUE)
