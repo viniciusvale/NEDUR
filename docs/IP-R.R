@@ -71,6 +71,7 @@
     r = read.xlsx("MIP2015_12s.xlsx", sheet = "r", colNames = FALSE) # Remunerações
     e = read.xlsx("MIP2015_12s.xlsx", sheet = "e", colNames = FALSE) # Pessoal ocupado
     c = read.xlsx("MIP2015_12s.xlsx", sheet = "c", colNames = FALSE) # Consumo das famílias
+    sp = read.xlsx("MIP2015_12s.xlsx", sheet = "sp", colNames = FALSE) # Setor de Pagamentos
     Setores = read.xlsx("MIP2015_12s.xlsx", sheet = "set", colNames = FALSE) # Setores
     
   } # Importando dados
@@ -89,6 +90,7 @@
     r = data.matrix(r) # Remunerações
     e = data.matrix(e) # Pessoal ocupado
     c = data.matrix(c) # Consumo das famílas
+    sp = data.matrix(sp) # Setor de Pagamentos
   
   } # Classe dos objetos
   {
