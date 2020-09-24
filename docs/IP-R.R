@@ -33,6 +33,7 @@
   # install.packages("scales")
   # install.packages("ggrepel")
   # install.packages("tibble")
+  # install.package("gridExtra")
   
   # Leitura dos pacotes
   library(openxlsx)
@@ -43,6 +44,7 @@
   library(scales)
   library(ggrepel)
   library(tibble)
+  library(gridExtra)
   
 } # Pacotes
 {
