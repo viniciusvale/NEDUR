@@ -451,7 +451,6 @@
       xlab("Setores") +
       ylab(" ") +
       ggtitle("Multiplicadores de Renda (Tipo I)") +
-      labs(subtitle = "2015") +
       labs(subtitle = "2015",
            caption = "Fonte: Elaboração própria com dados da MIP do IBGE (2015).") +
       theme(plot.title = element_text(hjust = 0.5),
@@ -471,7 +470,6 @@
       xlab("Setores") +
       ylab(" ") +
       ggtitle("Multiplicadores Totais de Renda (truncados)") +
-      labs(subtitle = "2015") +
       labs(subtitle = "2015",
            caption = "Fonte: Elaboração própria com dados da MIP do IBGE (2015).") +
       theme(plot.title = element_text(hjust = 0.5),
@@ -490,7 +488,6 @@
       xlab("Setores") +
       ylab(" ") +
       ggtitle("Multiplicadores de Renda (Tipo II)") +
-      labs(subtitle = "2015") +
       labs(subtitle = "2015",
            caption = "Fonte: Elaboração própria com dados da MIP do IBGE (2015).") +
       theme(plot.title = element_text(hjust = 0.5),
@@ -726,7 +723,7 @@
           axis.text.y = element_text(angle=35, hjust = 0.7)) +
     scale_fill_manual(name = "SI",
                       values=c("#e9e9e9", "#a9a9a9", "#3f3f3f", "#191919"),
-                      labels = c ("< Média", "< Média + DP", "< Média + 2DP", "> Média + DP"))
+                      labels = c ("< Média", "< Média + DP", "< Média + 2DP", "> Média + 2DP"))
   
 } # Campo de Influência
 {
